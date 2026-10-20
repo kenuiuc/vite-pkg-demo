@@ -13,7 +13,7 @@ vite-pkg-demo/
 ├─ index.html                 # 入口：先加载 /config.js，再加载 module
 ├─ vite.config.ts             # define：把 VITE_* 替换为 window.__APP_CONFIG__ 读取
 ├─ .env                       # 构建期公共默认值
-├─ .env.development           # 本地开发默认值（pnpm dev）
+├─ .env.dev                   # 本地开发默认值（pnpm dev）
 ├─ .env.build                 # 构建模式默认值（所有部署环境共用，输出 dist）
 ├─ public/
 │  └─ config.js               # 构建时复制到 dist/config.js（空模板）
@@ -38,12 +38,12 @@ vite-pkg-demo/
 | 文件 | 何时加载 | 作用 |
 |---|---|---|
 | `.env` | 所有 mode | 公共默认值，例如 `VITE_API_URL=/api` |
-| `.env.development` | `pnpm dev`（mode=`development`） | 本地开发：端口、代理、本地标题等 |
+| `.env.dev` | `pnpm dev`（mode=`dev`） | 本地开发：端口、代理、本地标题等 |
 | `.env.build` | `pnpm build`（mode=`build`） | **构建模式**：输出目录、压缩、构建期兜底值 |
 
 ```mermaid
 flowchart LR
-  A[".env.development"] --> B["pnpm dev<br/>开发服务器 + 热更新<br/>不产出 dist"]
+  A[".env.dev"] --> B["pnpm dev<br/>开发服务器 + 热更新<br/>不产出 dist"]
   C[".env<br/>公共默认"] --> B
   C --> D[".env.build<br/>pnpm build"]
   D --> E["dist<br/>唯一构建产物"]
@@ -58,13 +58,13 @@ flowchart LR
    sit / uat / prod 三个部署环境**共用同一份** `pnpm build` 产物。
 2. **部署环境数量不决定 `.env` 数量。**
    新增一个部署环境时，只需要新增 `deploy/config.<new-env>.js`，不需要新增 `.env`。
-3. **`development` vs `build` 对应的是"开发/构建"，不是"测试/生产"。**
+3. **`dev` vs `build` 对应的是"开发/构建"，不是"测试/生产"。**
    - `pnpm dev`：不打包，热更新，用于日常开发；
    - `pnpm build`：打包一次，产出 `dist`，用于所有部署环境。
 4. **各部署环境的差异不写进 `.env`。**
    后端地址、标题、租户/验证码开关等全部写在 `deploy/config.<env>.js`，运行时覆盖。
 5. **`deploy/config.local.js` 不参与 `pnpm dev`。**
-   它是"构建产物 + 本地后端"的运行期配置；`pnpm dev` 使用的是 `.env.development`。
+   它是"构建产物 + 本地后端"的运行期配置；`pnpm dev` 使用的是 `.env.dev`。
 6. **Vite 还会自动加载 `.env.local`**（如果存在），它优先级较高且**所有 mode 都会加载**。
    它是本地私有文件，不入库；CI 构建机必须确保不存在，否则可能把本机配置带进产物。
 
@@ -72,7 +72,7 @@ flowchart LR
 
 | 想改什么 | 改哪里 |
 |---|---|
-| 本地开发端口、Vite 代理、本地标题 | `.env.development` |
+| 本地开发端口、Vite 代理、本地标题 | `.env.dev` |
 | 构建输出目录、压缩、sourcemap、构建期兜底值 | `.env.build` |
 | 某个部署环境的 API 地址、标题、功能开关 | `deploy/config.<env>.js` |
 | 所有环境共享的默认值 | `.env` |
@@ -110,10 +110,10 @@ corepack pnpm dev
 
 本地开发时：
 
-- `pnpm dev` 等价于 `vite`（mode=`development`），只启动开发服务器，**不产出 `dist`**；
+- `pnpm dev` 等价于 `vite --mode dev`，只启动开发服务器，**不产出 `dist`**；
 - `VITE_BASE_URL=''`；
 - 请求 `/api/info` 由 Vite 代理到 `http://localhost:4000`；
-- `public/config.js` 是空对象，所以所有运行期键回落到 `.env.development`。
+- `public/config.js` 是空对象，所以所有运行期键回落到 `.env.dev`。
 
 ## 4. 构建一次
 

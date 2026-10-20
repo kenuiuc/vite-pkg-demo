@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --mode dev",
     "build": "vite build --mode build",
     "preview": "vite preview --mode build --port 4173",
     "test:e2e": "node ./node_modules/vite/bin/vite.js build --mode build && node tests/e2e.mjs"
