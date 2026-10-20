@@ -79,7 +79,7 @@ location = /config.js {
 | `src/main.ts` | 修改 | +3 行 |
 | `public/config.js` | 新增 | 1 个空模板 |
 | `deploy/config.local.js` 等 4 个 | 新增 | 每个约 15 行 |
-| `.env.prod` | 修改 | 2 行 |
+| `.env.build`（示例）/ `.env.prod`（Yudao 现有） | 修改 | 2 行 |
 | `Dockerfile`（若使用） | 修改 | 1 行 |
 | Nginx 配置 | 修改 | +7 行 |
 
@@ -212,7 +212,10 @@ window.__APP_CONFIG__ = {
 - 文件名固定为 `config.js` 的替换源，但仓库中可命名为 `config.<env>.js`；
 - 不要提交真正的服务端秘密。
 
-### 4.6 `.env.prod`
+### 4.6 `.env.build`（本示例）/ `.env.prod`（Yudao 现有命名）
+
+> 本示例使用 `--mode build` 和 `.env.build`，避免把"构建模式"误读成"prod 部署环境"。
+> Yudao 项目当前使用 `--mode prod` 和 `.env.prod`，两者语义等价；不想改脚本时保留 `.env.prod` 即可。
 
 ```ini
 # 构建期留空，避免产物中残留旧地址
@@ -222,7 +225,8 @@ VITE_BASE_URL=''
 VITE_OUT_DIR=dist
 ```
 
-`.env.stage` / `.env.test` 如果不再使用，可以保持不变；**发布只使用 `build:prod`**。
+`.env.stage` / `.env.test` 如果不再使用，可以保持不变；**发布只使用构建脚本**
+（示例为 `pnpm build`，Yudao 为 `pnpm build:prod`）。
 
 ### 4.7 `Dockerfile`（仅当使用容器构建）
 

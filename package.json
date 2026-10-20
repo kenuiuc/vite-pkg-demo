@@ -6,10 +6,9 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode prod",
-    "build:prod": "vite build --mode prod",
-    "preview": "vite preview --mode prod --port 4173",
-    "test:e2e": "node ./node_modules/vite/bin/vite.js build --mode prod && node tests/e2e.mjs"
+    "build": "vite build --mode build",
+    "preview": "vite preview --mode build --port 4173",
+    "test:e2e": "node ./node_modules/vite/bin/vite.js build --mode build && node tests/e2e.mjs"
   },
   "dependencies": {
     "vue": "3.5.34"
