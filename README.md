@@ -13,8 +13,8 @@ vite-pkg-demo/
 ├─ index.html                 # 入口：先加载 /config.js，再加载 module
 ├─ vite.config.ts             # define：把 VITE_* 替换为 window.__APP_CONFIG__ 读取
 ├─ .env                       # 构建期公共默认值
-├─ .env.development           # 本地开发默认值
-├─ .env.prod                  # 生产构建默认值（输出 dist）
+├─ .env.development           # 本地开发默认值（pnpm dev）
+├─ .env.prod                  # 构建模式默认值（所有部署环境共用，输出 dist）
 ├─ public/
 │  └─ config.js               # 构建时复制到 dist/config.js（空模板）
 ├─ deploy/
@@ -30,6 +30,55 @@ vite-pkg-demo/
 ├─ tests/e2e.mjs              # 自动 E2E：四个环境一次跑完
 └─ docs/REPLAY-GUIDE.md       # 如何把改动重放到完整 Yudao 项目
 ```
+
+### 1.1 为什么只需要 3 个 `.env` 文件
+
+不管最终有多少个**部署环境**（local / sit / uat / prod / 以后再加），Vite 侧只需要这 3 个文件：
+
+| 文件 | 何时加载 | 作用 |
+|---|---|---|
+| `.env` | 所有 mode | 公共默认值，例如 `VITE_API_URL=/api` |
+| `.env.development` | `pnpm dev`（mode=`development`） | 本地开发：端口、代理、本地标题等 |
+| `.env.prod` | `pnpm build`（mode=`prod`） | **生产构建**：输出目录、压缩、构建期兜底值 |
+
+```mermaid
+flowchart LR
+  A[".env.development"] --> B["pnpm dev<br/>开发服务器 + 热更新<br/>不产出 dist"]
+  C[".env<br/>公共默认"] --> B
+  C --> D[".env.prod<br/>pnpm build"]
+  D --> E["dist<br/>唯一构建产物"]
+  E --> F["部署到 sit<br/>+ config.sit.js"]
+  E --> G["部署到 uat<br/>+ config.uat.js"]
+  E --> H["部署到 prod<br/>+ config.prod.js"]
+```
+
+#### 关键澄清
+
+1. **`.env.prod` 里的 `prod` 不是"prod 部署环境"，而是"生产构建模式"。**
+   sit / uat / prod 三个部署环境**共用同一份** `pnpm build` 产物。
+2. **部署环境数量不决定 `.env` 数量。**
+   新增一个部署环境时，只需要新增 `deploy/config.<new-env>.js`，不需要新增 `.env`。
+3. **`development` vs `prod` 对应的是"开发/构建"，不是"测试/生产"。**
+   - `pnpm dev`：不打包，热更新，用于日常开发；
+   - `pnpm build`：打包一次，产出 `dist`，用于所有部署环境。
+4. **各部署环境的差异不写进 `.env`。**
+   后端地址、标题、租户/验证码开关等全部写在 `deploy/config.<env>.js`，运行时覆盖。
+5. **`deploy/config.local.js` 不参与 `pnpm dev`。**
+   它是"构建产物 + 本地后端"的运行期配置；`pnpm dev` 使用的是 `.env.development`。
+6. **Vite 还会自动加载 `.env.local`**（如果存在），它优先级较高且**所有 mode 都会加载**。
+   它是本地私有文件，不入库；CI 构建机必须确保不存在，否则可能把本机配置带进产物。
+
+#### 想改配置时应该改哪里
+
+| 想改什么 | 改哪里 |
+|---|---|
+| 本地开发端口、Vite 代理、本地标题 | `.env.development` |
+| 构建输出目录、压缩、sourcemap、构建期兜底值 | `.env.prod` |
+| 某个部署环境的 API 地址、标题、功能开关 | `deploy/config.<env>.js` |
+| 所有环境共享的默认值 | `.env` |
+
+> 如果团队觉得 `prod` 这个名字容易误解，可以把它改名为 `.env.build`，并把脚本改成
+> `vite build --mode build`；功能完全一样。本示例保留 `prod` 是为了与 Yudao 项目保持一致。
 
 ## 2. 环境要求
 
@@ -60,6 +109,7 @@ corepack pnpm dev
 
 本地开发时：
 
+- `pnpm dev` 等价于 `vite`（mode=`development`），只启动开发服务器，**不产出 `dist`**；
 - `VITE_BASE_URL=''`；
 - 请求 `/api/info` 由 Vite 代理到 `http://localhost:4000`；
 - `public/config.js` 是空对象，所以所有运行期键回落到 `.env.development`。
@@ -69,6 +119,9 @@ corepack pnpm dev
 ```bash
 corepack pnpm build
 ```
+
+> 这里的 `prod` 是**构建模式名**（production build），不是 `prod` 部署环境。
+> 这次构建产出的 `dist` 会同时用于 sit、uat、prod 等所有部署环境。
 
 产物：`dist/`。
 
