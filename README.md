@@ -39,7 +39,9 @@ vite-pkg-demo/
 |---|---|---|
 | `.env` | 所有 mode | 公共默认值，例如 `VITE_API_URL=/api` |
 | `.env.dev` | `pnpm dev`（mode=`dev`） | 本地开发：端口、代理、本地标题等 |
-| `.env.build` | `pnpm build`（mode=`build`） | **构建模式**：输出目录、压缩、构建期兜底值 |
+| `.env.build` | `pnpm build`（mode=`build`） | **构建模式**：构建标识、输出目录（其余继承 `.env`） |
+
+> 每个键只在需要它的地方出现：共享值放 `.env`，开发覆盖放 `.env.dev`，构建专属放 `.env.build`。
 
 ```mermaid
 flowchart LR
