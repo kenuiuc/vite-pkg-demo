@@ -1,0 +1,22 @@
+{
+  "name": "vite-pkg-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --mode prod",
+    "build:prod": "vite build --mode prod",
+    "preview": "vite preview --mode prod --port 4173",
+    "test:e2e": "node ./node_modules/vite/bin/vite.js build --mode prod && node tests/e2e.mjs"
+  },
+  "dependencies": {
+    "vue": "3.5.34"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.6",
+    "playwright-core": "^1.49.0",
+    "vite": "8.1.4"
+  }
+}

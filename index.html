@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 标题由 src/main.ts 在运行期覆盖；不要在这里使用 %VITE_APP_TITLE% -->
+    <title>Vite Package Once Demo</title>
+    <!-- 运行期配置：必须在 module 入口之前加载，不能加 defer/async/type=module -->
+    <script src="/config.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
